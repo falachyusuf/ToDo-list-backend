@@ -1,4 +1,4 @@
-package id.backend.todo_list.model;
+package id.backend.todo_list.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
