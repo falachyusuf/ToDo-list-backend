@@ -36,19 +36,59 @@ public class ActivityService {
             ActivityEntity savedActivity = activityRepository.save(activityData);
             // Cek apakah data berhasil disimpan
             if (savedActivity == null) {
-                outMsg.setResponseCode(HttpStatusCode.valueOf(400).toString());
-                outMsg.setResponseMessage("Gagal menambah aktivitas, data kosong");
+                outMsg.setResponseCode(HttpStatusCode.valueOf(204).toString());
+                outMsg.setResponseMessage("Gagal menambah aktivitas");
+                log.info("RESPONSE SAVE ERROR: [{}]", JsonUtils.convertToString(outMsg));
                 return outMsg;
             }
             outMsg.setResponseCode(HttpStatusCode.valueOf(200).toString());
             outMsg.setResponseMessage("Berhasil menambah aktivitas");
             outMsg.setResponseData(savedActivity);
+            log.info("RESPONSE SAVE SUCCESS: [{}]", JsonUtils.convertToString(outMsg));
+            return outMsg;
+        } catch (Exception e) {
+            outMsg.setResponseCode(HttpStatusCode.valueOf(500).toString());
+            outMsg.setResponseMessage("Internal Server Error");
+            log.info("RESPONSE SAVE ERROR: [{}]", JsonUtils.convertToString(outMsg));
+            return outMsg;
+        }
+    }
+
+    public GeneralResponseDto doUpdateActivity(Long id, ActivityRequestDto inMsg) {
+        GeneralResponseDto outMsg = new GeneralResponseDto();
+        try {
+            Optional<ActivityEntity> activityData = activityRepository.findById(id);
+            // Cek apakah data ditemukan pada database
+            if(!activityData.isPresent()){
+                outMsg.setResponseCode(HttpStatusCode.valueOf(204).toString());
+                outMsg.setResponseMessage("Data tidak ditemukan");
+                log.info("RESPONSE SAVE ERROR: [{}]", JsonUtils.convertToString(outMsg));
+                return outMsg;
+            }
+            activityData.get().setName(inMsg.getName());
+            activityData.get().setDescription(inMsg.getDescription());
+            // Parse tanggal mulai dan selesai menggunakan TimeUtils dari format string -> Date
+            Date startDate = TimeUtils.doGetDateFormat(inMsg.getStartDate());
+            Date endDate = TimeUtils.doGetDateFormat(inMsg.getEndDate());
+            activityData.get().setStartDate(startDate);
+            activityData.get().setEndDate(endDate);
+            // Update data ke database
+            ActivityEntity updatedActivity = activityRepository.save(activityData.get());
+            // Cek apakah data berhasil diupdate
+            if (updatedActivity == null) {
+                outMsg.setResponseCode(HttpStatusCode.valueOf(204).toString());
+                outMsg.setResponseMessage("Gagal mengupdate aktivitas");
+                log.info("RESPONSE UPDATE ERROR: [{}]", JsonUtils.convertToString(outMsg));
+                return outMsg;
+            }
+            outMsg.setResponseCode(HttpStatusCode.valueOf(200).toString());
+            outMsg.setResponseMessage("Berhasil mengupdate aktivitas");
+            outMsg.setResponseData(updatedActivity);
             return outMsg;
         } catch (Exception e) {
             outMsg.setResponseCode(HttpStatusCode.valueOf(500).toString());
             outMsg.setResponseMessage("Internal Server Error");
             log.info("RESPONSE ERROR: [{}]", JsonUtils.convertToString(outMsg));
-            log.info("err: [{}]", JsonUtils.convertToString(e));
             return outMsg;
         }
     }
