@@ -28,4 +28,23 @@ public class ActivityController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping(path = "/")
+    public ResponseEntity<?> doGetAllActivity(@RequestParam(name = "pageNumber", defaultValue = "1") Integer pageNumber,
+                                              @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+        Object response = activityService.doInquiryAllActivity(pageNumber, pageSize);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/{id}")
+    public ResponseEntity<?> doGetActivityById(@PathVariable Long id) {
+        Object response = activityService.doInquiryByIdActivity(id);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<?> doDeleteActivity(@PathVariable Long id) {
+        Object response = activityService.doDeleteActivity(id);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }

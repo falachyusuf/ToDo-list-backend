@@ -8,10 +8,15 @@ import id.backend.todo_list.utils.JsonUtils;
 import id.backend.todo_list.utils.TimeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -62,7 +67,7 @@ public class ActivityService {
             if(!activityData.isPresent()){
                 outMsg.setResponseCode(HttpStatusCode.valueOf(204).toString());
                 outMsg.setResponseMessage("Data tidak ditemukan");
-                log.info("RESPONSE SAVE ERROR: [{}]", JsonUtils.convertToString(outMsg));
+                log.info("RESPONSE UPDATE ERROR: [{}]", JsonUtils.convertToString(outMsg));
                 return outMsg;
             }
             activityData.get().setName(inMsg.getName());
@@ -84,11 +89,87 @@ public class ActivityService {
             outMsg.setResponseCode(HttpStatusCode.valueOf(200).toString());
             outMsg.setResponseMessage("Berhasil mengupdate aktivitas");
             outMsg.setResponseData(updatedActivity);
+            log.info("RESPONSE UPDATE SUCCESS: [{}]", JsonUtils.convertToString(outMsg));
             return outMsg;
         } catch (Exception e) {
             outMsg.setResponseCode(HttpStatusCode.valueOf(500).toString());
             outMsg.setResponseMessage("Internal Server Error");
-            log.info("RESPONSE ERROR: [{}]", JsonUtils.convertToString(outMsg));
+            log.info("RESPONSE UPDATE ERROR: [{}]", JsonUtils.convertToString(outMsg));
+            return outMsg;
+        }
+    }
+
+    public GeneralResponseDto doInquiryAllActivity(Integer pageNumber, Integer pageSize) {
+        GeneralResponseDto outMsg = new GeneralResponseDto();
+        try {
+            Sort sort = Sort.by(Sort.Direction.ASC, "id");
+            Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+            Page<ActivityEntity> activityData = Page.empty();
+            activityData = activityRepository.findAll(pageable);
+            // Cek apakah data kosong atau tidak
+            if(activityData == null){
+                outMsg.setResponseCode(HttpStatusCode.valueOf(204).toString());
+                outMsg.setResponseMessage("Data tidak ditemukan");
+                outMsg.setResponseData(activityData);
+                log.info("RESPONSE INQUIRY ERROR: [{}]", JsonUtils.convertToString(outMsg));
+                return outMsg;
+            }
+            outMsg.setResponseCode(HttpStatusCode.valueOf(200).toString());
+            outMsg.setResponseMessage("Berhasil mendapatkan data aktivitas");
+            outMsg.setResponseData(activityData);
+            log.info("RESPONSE INQUIRY SUCCESS: [{}]", JsonUtils.convertToString(outMsg));
+            return outMsg;
+        } catch (Exception e) {
+            outMsg.setResponseCode(HttpStatusCode.valueOf(500).toString());
+            outMsg.setResponseMessage("Internal Server Error");
+            log.info("RESPONSE INQUIRY ERROR: [{}]", JsonUtils.convertToString(outMsg));
+            return outMsg;
+        }
+    }
+
+    public GeneralResponseDto doInquiryByIdActivity(long id) {
+        GeneralResponseDto outMsg = new GeneralResponseDto();
+        try {
+            Optional<ActivityEntity> activityById = activityRepository.getActivityById(id);
+            if(activityById.isEmpty()){
+                outMsg.setResponseCode(HttpStatusCode.valueOf(204).toString());
+                outMsg.setResponseMessage("Data tidak ditemukan");
+                outMsg.setResponseData(null);
+                log.info("RESPONSE INQUIRY BY ID ERROR: [{}]", JsonUtils.convertToString(outMsg));
+                return outMsg;
+            }
+            outMsg.setResponseCode(HttpStatusCode.valueOf(200).toString());
+            outMsg.setResponseMessage("Berhasil mendapatkan data aktivitas");
+            log.info("RESPONSE INQUIRY BY ID SUCCESS: [{}]", JsonUtils.convertToString(outMsg));
+            return outMsg;
+        }catch (Exception e){
+            outMsg.setResponseCode(HttpStatusCode.valueOf(500).toString());
+            outMsg.setResponseMessage("Internal Server Error");
+            log.info("RESPONSE INQUIRY BY ID ERROR: [{}]", JsonUtils.convertToString(outMsg));
+            return outMsg;
+        }
+    }
+
+    public GeneralResponseDto doDeleteActivity(Long id) {
+        GeneralResponseDto outMsg = new GeneralResponseDto();
+        try {
+            Optional<ActivityEntity> activityData = activityRepository.findById(id);
+            if(activityData.isEmpty()) {
+                outMsg.setResponseCode(HttpStatusCode.valueOf(204).toString());
+                outMsg.setResponseMessage("Data tidak ditemukan");
+                outMsg.setResponseData(null);
+                log.info("RESPONSE DELETE ERROR: [{}]", JsonUtils.convertToString(outMsg));
+                return outMsg;
+            }
+            activityRepository.deleteById(id);
+            outMsg.setResponseCode(HttpStatusCode.valueOf(200).toString());
+            outMsg.setResponseMessage("Berhasil menghapus aktivitas");
+            log.info("RESPONSE INQUIRY BY ID SUCCESS: [{}]", JsonUtils.convertToString(outMsg));
+            return outMsg;
+        } catch (Exception e) {
+            outMsg.setResponseCode(HttpStatusCode.valueOf(500).toString());
+            outMsg.setResponseMessage("Internal Server Error");
+            log.info("RESPONSE DELETE ERROR: [{}]", JsonUtils.convertToString(outMsg));
             return outMsg;
         }
     }
