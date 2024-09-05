@@ -110,13 +110,13 @@ public class ActivityService {
             if(activityData == null){
                 outMsg.setResponseCode(HttpStatusCode.valueOf(204).toString());
                 outMsg.setResponseMessage("Data tidak ditemukan");
-                outMsg.setResponseData(activityData);
+                outMsg.setResponseData(activityData.getContent());
                 log.info("RESPONSE INQUIRY ERROR: [{}]", JsonUtils.convertToString(outMsg));
                 return outMsg;
             }
             outMsg.setResponseCode(HttpStatusCode.valueOf(200).toString());
             outMsg.setResponseMessage("Berhasil mendapatkan data aktivitas");
-            outMsg.setResponseData(activityData);
+            outMsg.setResponseData(activityData.getContent());
             log.info("RESPONSE INQUIRY SUCCESS: [{}]", JsonUtils.convertToString(outMsg));
             return outMsg;
         } catch (Exception e) {

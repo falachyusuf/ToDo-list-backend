@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin
 @Controller
 @RequestMapping("/api/v1/activity")
 public class ActivityController {
@@ -29,8 +30,8 @@ public class ActivityController {
     }
 
     @GetMapping(path = "/")
-    public ResponseEntity<?> doGetAllActivity(@RequestParam(name = "pageNumber", defaultValue = "1") Integer pageNumber,
-                                              @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+    public ResponseEntity<?> doGetAllActivity(@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+                                              @RequestParam(name = "pageSize", defaultValue = "3") Integer pageSize) {
         Object response = activityService.doInquiryAllActivity(pageNumber, pageSize);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
